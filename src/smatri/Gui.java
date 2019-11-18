@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Vue;
+package smatri;
 
 import jade.core.AID;
 import java.awt.Color;
@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
@@ -32,13 +33,17 @@ import smatri.Position;
 public class Gui extends JFrame {
 
     private Collection< Position> Agentpositions;
-     private Collection< Position>ObjectPositions;
+     private Map< Position, String>Object;
     private Image dbImage;
-
+private int n,m;
     private painting_area canvas;
 
-    public Gui() {
+    public Gui(int n ,int m ,Map< Position, String> Object ) {
         try {
+            this.n= n*10;
+             this.m= m*10;
+             this.Object=Object;
+             setSize(this.n,this.m);
             jbInit();
         } catch (Exception e) {
             e.printStackTrace();
@@ -47,9 +52,7 @@ public class Gui extends JFrame {
 
     private void jbInit() throws Exception {
 
-        dbImage = ImageIO.read(new File("test.jpg"));
-
-      
+     
         canvas = new painting_area();
         add(canvas);
 
@@ -67,9 +70,9 @@ public class Gui extends JFrame {
 
         this.Agentpositions = positions;
     }
-    public  void moveObject(Collection< Position> positions) {
+    public  void moveObject(Map<  Position,String > positions) {
 
-        this.ObjectPositions = positions;
+        this.Object = positions;
     }
 
     public class painting_area extends JPanel {
@@ -77,28 +80,32 @@ public class Gui extends JFrame {
         public void paintComponent(Graphics g) {
             super.paintComponent(g);
             //
-
-            g.drawImage(dbImage, 0, 0, getWidth(), getHeight(), this);
-            if (Agentpositions!=null && ObjectPositions!=null) {
+             g.setColor(Color.BLACK);
+            for (int x = 0; x <= n; x += 10)
+                for (int y = 0; y <= m; y +=10)
+                    g.drawRect(x, y, 10, 10);
+    
+           
+            if (Agentpositions!=null && Object!=null) {
                 for(Position pos :Agentpositions){               
-                    try {                      
-                        g.drawImage(ImageIO.read(new File("agent.jpg")), pos.getX() * 100 + 25, pos.getY() * 100 + 25,
-                                25,
-                                25, this);
-                    } catch (IOException ex) {
-                        Logger.getLogger(Gui.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                                       
+                        g.fillOval(pos.getX()*10 , pos.getY()*10 , 10, 10);
+                  
                 }
-                  g.setColor(Color.RED);
-                for(Position pos :ObjectPositions){               
-                    try {                      
-                        g.drawImage(ImageIO.read(new File("agent.jpg")), pos.getX() * 100 + 25, pos.getY() * 100 + 25,
-                                25,
-                                25, this);
-                        g.fillOval(pos.getX() * 100 + 25, pos.getX() * 100 + 25, 25, 25);
-                    } catch (IOException ex) {
-                        Logger.getLogger(Gui.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+               Iterator i = Object.entrySet().iterator();
+                while (i.hasNext()) {            
+                                 Map.Entry form = (Map.Entry) i.next();
+                        String name = (String) form.getValue();
+                        Position pos = (Position) form.getKey();        
+                        if(name=="B"){
+                              g.setColor(new Color(255, 0, 0, 125));
+                            
+                        }else{
+                            
+                              g.setColor(new Color(0, 0, 255, 125));
+                        }
+                            g.fillOval(pos.getX() * 10, pos.getY() * 10, 10, 10);
+                   
                 }
             }
 

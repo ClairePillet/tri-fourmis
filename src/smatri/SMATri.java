@@ -5,6 +5,13 @@
  */
 package smatri;
 
+import jade.core.Profile;
+import jade.core.ProfileImpl;
+import jade.core.Runtime;
+import jade.wrapper.AgentContainer;
+import jade.wrapper.AgentController;
+import jade.wrapper.StaleProxyException;
+
 /**
  *
  * @author claire
@@ -19,28 +26,22 @@ public class SMATri {
         AgentContainer mc = runtime.createMainContainer(config);
         AgentController acA;
         AgentController acB;
+       
 
-        Environnement env = new Environnement(5);
+        Environement env = new Environement(2, 2);
 
         try {
             Object[] param = {env};
-            acA = mc.createNewAgent("A", FormeAgent.class.getName(), param);
-            acA.start();
+            int i = 0;
+            while (i < 2) {
+                acA = mc.createNewAgent("A" + i, AntAgent.class.getName(), param);
+                acA.start();
+                i++;
+            }
 
-            acB = mc.createNewAgent("B", FormeAgent.class.getName(), param);
-            acB.start();
-
-            acB = mc.createNewAgent("C", FormeAgent.class.getName(), param);
-            acB.start();
-
-            acB = mc.createNewAgent("D", FormeAgent.class.getName(), param);
-            acB.start();
-
-            acB = mc.createNewAgent("E", FormeAgent.class.getName(), param);
-            acB.start();
-          
         } catch (StaleProxyException ignored) {
+            System.err.println(ignored);
         }
     }
-    
+
 }
