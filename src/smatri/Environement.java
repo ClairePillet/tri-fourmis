@@ -40,7 +40,7 @@ public class Environement {
     volatile Map<AID, Position> agentPosition;
     volatile Map<Position, String> objectPosition;
     private Gui GUI;
-
+    static int countDrop=0;
     boolean verbose = false;
 
     public Environement(int n, int m) {
@@ -49,18 +49,19 @@ public class Environement {
         objectPosition = new ConcurrentHashMap<Position, String>();
         agentPosition = new ConcurrentHashMap<AID, Position>();
 
-        generateObject();
+        
         this.GUI = new Gui(n, m, objectPosition);
         GUI.setSize(n * 10, n * 10);
         GUI.setLocation(700, 20);
         GUI.setVisible(true);
         GUI.validate();
+        generateObject();
     }
 
     public void generateObject() {
         String obj = "A";
-        for (int i = 0; i < 2; i++) {
-            if (i == 1) {
+        for (int i = 0; i < 400; i++) {
+            if (i == 200) {
                 obj = "B";
             }
             boolean isFree = false;
@@ -76,30 +77,54 @@ public class Environement {
             }
             objectPosition.put(new Position(rx, ry), obj);
         }
+        update();
     }
-
-    public synchronized void moveAgent(AID id, Position new_position) {
-        agentPosition.remove(id);
-        if(new_position.getY()>m){
-            new_position.setY(new_position.getY()-1);
-        }
-        if(new_position.getX()>m){
-            new_position.setX(new_position.getX()-1);
-        }
-        agentPosition.put(id, new_position);
+    public synchronized void update(){
         GUI.moveAgent(agentPosition.values());
+        GUI.moveObject(objectPosition);
+    }
+    public synchronized boolean moveAgent(AID id, Position new_position, Position oldP, boolean back) {
+
+        if (new_position.getY() > m) {
+            new_position.setY(new_position.getY() - 1);
+        }
+        if (new_position.getX() > m) {
+            new_position.setX(new_position.getX() - 1);
+        }
+        if (caseIsFreeofAgent(new_position) != null) {
+            return false;
+
+        }
+//           if(back!=true){
+//               
+//               agentPosition.replace( id,oldP);
+//           }
+        agentPosition.remove(id);
+        agentPosition.put(id, new_position);
+
+      //  GUI.moveAgent(agentPosition.values());
+        return true;
     }
 
     public synchronized String takeObject(Position new_position) {
         String o = objectPosition.get(new_position);
-        objectPosition.remove(new_position);
-        GUI.moveObject(objectPosition);
-        return o;
+        if (o != null) {
+            objectPosition.remove(new_position);
+          //  GUI.moveObject(objectPosition);
+            return o;
+        }
+
+        return "";
     }
 
     public synchronized void dropObject(Position new_position, String obj) {
         objectPosition.put(new_position, obj);
-        GUI.moveObject(objectPosition);
+        countDrop++;
+        System.err.println(countDrop);
+        if(countDrop%100000==0){
+            update();
+        }
+        //GUI.moveObject(objectPosition);
     }
 
     public synchronized AID caseIsFreeofAgent(Position new_position) {
@@ -120,16 +145,15 @@ public class Environement {
     public synchronized String caseIsFree(Position new_position) {
 
         Iterator i = objectPosition.entrySet().iterator();
-     
-            while (i.hasNext()) {
-                Map.Entry ps = (Map.Entry) i.next();
-                Position pos = (Position) ps.getKey();
-                if (pos.equals(new_position) == true) {
 
-                    return "A";//(String) ps.getValue();
-                }
+        while (i.hasNext()) {
+            Map.Entry ps = (Map.Entry) i.next();
+            Position pos = (Position) ps.getKey();
+            if (pos.equals(new_position) == true) {
+
+                return (String) ps.getValue();
             }
-        
+        }
 
         return null;
     }
@@ -148,7 +172,7 @@ public class Environement {
         Position p1 = new Position(rx, ry);
 
         agentPosition.put(aid, p1);
-        GUI.moveAgent(agentPosition.values());
+        //GUI.moveAgent(agentPosition.values());
         return p1;
     }
 

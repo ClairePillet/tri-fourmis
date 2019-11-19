@@ -28,12 +28,12 @@ public class SMATri {
         AgentController acB;
        
 
-        Environement env = new Environement(2, 2);
+        Environement env = new Environement(50, 50);
 
         try {
             Object[] param = {env};
             int i = 0;
-            while (i < 2) {
+            while (i < 200) {
                 acA = mc.createNewAgent("A" + i, AntAgent.class.getName(), param);
                 acA.start();
                 i++;

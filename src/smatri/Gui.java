@@ -58,7 +58,7 @@ private int n,m;
 
         ActionListener taskPerformer = new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                canvas.repaint();
+                //canvas.repaint();
             }
         };
 
@@ -73,6 +73,7 @@ private int n,m;
     public  void moveObject(Map<  Position,String > positions) {
 
         this.Object = positions;
+         canvas.repaint();
     }
 
     public class painting_area extends JPanel {
@@ -87,11 +88,11 @@ private int n,m;
     
            
             if (Agentpositions!=null && Object!=null) {
-                for(Position pos :Agentpositions){               
-                                       
-                        g.fillOval(pos.getX()*10 , pos.getY()*10 , 10, 10);
-                  
-                }
+//                for(Position pos :Agentpositions){               
+//                                       
+//                        g.fillOval(pos.getX()*10 , pos.getY()*10 , 10, 10);
+//                  
+//                }
                Iterator i = Object.entrySet().iterator();
                 while (i.hasNext()) {            
                                  Map.Entry form = (Map.Entry) i.next();

@@ -60,6 +60,14 @@ public class Position  {
         }
         return false;
     }
+  @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 79 * hash + this.x;
+        hash = 79 * hash + this.y;
+        return hash;
+    }
+
 
     @Override
     public String toString() {
