@@ -36,22 +36,25 @@ public class Environement {
 
     private Integer n;
     private Integer m;
-
+  private Integer nbObj;
+    private Integer nbTypeObj;
     volatile Map<AID, Position> agentPosition;
     volatile Map<Position, String> objectPosition;
     private Gui GUI;
     static int countDrop=0;
     boolean verbose = false;
 
-    public Environement(int n, int m) {
+    public Environement(int n, int m, int nbObj, int nbTypeObj) {
         this.n = n;
         this.m = m;
+        this.nbObj=nbObj;
+         this.nbTypeObj=nbTypeObj;
         objectPosition = new ConcurrentHashMap<Position, String>();
         agentPosition = new ConcurrentHashMap<AID, Position>();
 
         
         this.GUI = new Gui(n, m, objectPosition);
-        GUI.setSize(n * 10, n * 10);
+        GUI.setSize(n * 10, m * 10);
         GUI.setLocation(700, 20);
         GUI.setVisible(true);
         GUI.validate();
@@ -59,10 +62,11 @@ public class Environement {
     }
 
     public void generateObject() {
-        String obj = "A";
-        for (int i = 0; i < 400; i++) {
-            if (i == 200) {
-                obj = "B";
+        char obj = 'A';
+        for (int i = 0; i < nbObj; i++) {
+            if (i % (nbObj/nbTypeObj)==0) {
+                obj ++;
+                System.err.println(i+" "+ obj);
             }
             boolean isFree = false;
             Random rand = new Random();
@@ -75,7 +79,7 @@ public class Environement {
                 }
 
             }
-            objectPosition.put(new Position(rx, ry), obj);
+            objectPosition.put(new Position(rx, ry), String.valueOf(obj));
         }
         update();
     }
@@ -93,24 +97,32 @@ public class Environement {
         }
         if (caseIsFreeofAgent(new_position) != null) {
             return false;
-
         }
-//           if(back!=true){
-//               
-//               agentPosition.replace( id,oldP);
-//           }
         agentPosition.remove(id);
         agentPosition.put(id, new_position);
 
-      //  GUI.moveAgent(agentPosition.values());
+        GUI.moveAgent(agentPosition.values());
         return true;
     }
-
+    public synchronized String getVis(Position p, int champs){
+        String s="";
+        for(int i=p.getX()-champs ; i<(champs+p.getX()); i++){
+             for(int j=p.getY()-champs ; j<(champs+p.getY()); j++){
+                 String v = caseIsFree(new Position(i,j));
+                 if(v==null){
+                     s=s.concat("0");
+                 }else{
+                     s=s.concat(v); 
+                 }
+            }
+        }
+        return s;
+    }
     public synchronized String takeObject(Position new_position) {
         String o = objectPosition.get(new_position);
         if (o != null) {
             objectPosition.remove(new_position);
-          //  GUI.moveObject(objectPosition);
+            GUI.moveObject(objectPosition);
             return o;
         }
 
@@ -118,13 +130,8 @@ public class Environement {
     }
 
     public synchronized void dropObject(Position new_position, String obj) {
-        objectPosition.put(new_position, obj);
-        countDrop++;
-        System.err.println(countDrop);
-        if(countDrop%100000==0){
-            update();
-        }
-        //GUI.moveObject(objectPosition);
+        objectPosition.put(new_position, obj);                
+        GUI.moveObject(objectPosition);
     }
 
     public synchronized AID caseIsFreeofAgent(Position new_position) {
